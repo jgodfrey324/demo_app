@@ -26,7 +26,6 @@ export default function ProductsPage() {
 
 // SSR with Redux
 export const getServerSideProps = wrapper.getServerSideProps(store => async () => {
-    console.log('SSR running')
     await store.dispatch(fetchProducts())
     return { props: {} }
 })

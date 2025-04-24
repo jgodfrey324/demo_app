@@ -9,7 +9,6 @@ const initialState = {
 
 // Async thunk to fetch products
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
-  console.log('[Thunk] Fetching products...')
   const res = await fetch('https://fakestoreapi.com/products');
   if (!res.ok) {
     throw new Error('Failed to fetch products');
