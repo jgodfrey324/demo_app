@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { createWrapper } from 'next-redux-wrapper'
 import logger from 'redux-logger';
 import charactersReducer from '@/features/characters/charactersSlice'
-import favoritesReducer from './slices/favoritesSlice'
+import favoritesReducer from '@/features/favorites/favoritesSlice'
 import episodesReducer from '@/features/episodes/episodesSlice'
 
 const makeStore = () =>

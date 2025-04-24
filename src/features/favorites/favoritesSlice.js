@@ -4,7 +4,7 @@ import { addFavoriteThunk, removeFavoriteThunk } from './favoritesAPI'
 const favoritesSlice = createSlice({
     name: 'favorites',
     initialState: {
-      list: [],
+      ids: [],
       status: 'idle', // 'idle', 'loading', 'succeeded', 'failed'
       error: null,
     },
@@ -16,8 +16,9 @@ const favoritesSlice = createSlice({
         })
         .addCase(addFavoriteThunk.fulfilled, (state, action) => {
           state.status = 'succeeded'
-          if (!state.list.some(char => char.id === action.payload.id)) {
-            state.list.push(action.payload)
+          const char = action.payload
+          if (!state.includes(char.id)) {
+            state.ids = [...state.ids, char.id]
           }
         })
         .addCase(addFavoriteThunk.rejected, (state, action) => {
@@ -29,7 +30,8 @@ const favoritesSlice = createSlice({
         })
         .addCase(removeFavoriteThunk.fulfilled, (state, action) => {
           state.status = 'succeeded'
-          state.list = state.list.filter(char => char.id !== action.payload)
+          const charId = action.payload
+          state.ids = [...state.ids.filter(id => id !== charId)]
         })
         .addCase(removeFavoriteThunk.rejected, (state, action) => {
           state.status = 'failed'

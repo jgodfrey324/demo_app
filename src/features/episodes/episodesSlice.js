@@ -13,7 +13,8 @@ export const fetchEpisodes = createAsyncThunk(
 const episodesSlice = createSlice({
   name: 'episodes',
   initialState: {
-    list: [],
+    episodes: {},
+    ids: [],
     status: 'idle',  // 'idle', 'loading', 'succeeded', 'failed'
     error: null,
   },
@@ -25,7 +26,14 @@ const episodesSlice = createSlice({
       })
       .addCase(fetchEpisodes.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.list = action.payload
+        const episodes = action.payload
+        // Normalize and add characters to the store
+        episodes.forEach(episode => {
+          if (!state.episodes[episode.id]) {
+            state.episodes[episode.id] = episode
+            state.ids = [...state.ids, episode.id]
+          }
+        })
       })
       .addCase(fetchEpisodes.rejected, (state, action) => {
         state.status = 'failed'
