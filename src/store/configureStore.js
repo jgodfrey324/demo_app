@@ -1,28 +1,17 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit'
-import { createWrapper, HYDRATE } from 'next-redux-wrapper'
-import counterReducer from '@/features/counters/counterSlice'
-import productsReducer from '@/features/products/productsSlice'
+import { configureStore } from '@reduxjs/toolkit'
+import { createWrapper } from 'next-redux-wrapper'
 import logger from 'redux-logger';
-
-const combinedReducer = combineReducers({
-    counter: counterReducer,
-    products: productsReducer,
-  })
-  
-const rootReducer = (state, action) => {
-    if (action.type === HYDRATE) {
-        return {
-            ...state,
-            ...action.payload,
-        }
-    }
-        return combinedReducer(state, action)
-    }
-  
+import charactersReducer from '@/features/characters/charactersSlice'
+import favoritesReducer from './slices/favoritesSlice'
+import episodesReducer from '@/features/episodes/episodesSlice'
 
 const makeStore = () =>
     configureStore({
-        reducer: rootReducer,
+        reducer: {
+            characters: charactersReducer,
+            favorites: favoritesReducer,
+            episodes: episodesReducer,
+          },
         devTools: process.env.NODE_ENV !== 'production',
         middleware: (getDefaultMiddleware) =>
             process.env.NODE_ENV === 'development'
