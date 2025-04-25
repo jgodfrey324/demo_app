@@ -1,12 +1,13 @@
 import Episode from '@/features/episodes/Episode'
-import { wrapper } from '../store'
+import { wrapper } from '../store/configureStore'
 import { fetchEpisodes } from '@/features/episodes/episodesSlice'
 import { useSelector } from 'react-redux'
 import Favorite from '@/features/favorites/Favorite'
+import HomeButton from '@/components/HomeButton'
 
 export default function EpisodesPage() {
-  const { episodes, status, error } = useSelector(state => state.episodes)
-  const favorites = useSelector(state => state.favorites.favorites)
+  const { episodes, ids, status, error } = useSelector(state => state.episodes)
+  const favorites = useSelector(state => state.favorites.ids)
 
   if (status === 'loading') {
     return <div>Loading episodes...</div>
@@ -17,28 +18,34 @@ export default function EpisodesPage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Episodes</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {episodes.map(ep => (
-          <Episode ep={ep} key={ep.id} />
+    <div className="min-h-screen bg-[#f3f0e0] text-[#2f2f2f] font-serif p-6">
+      <HomeButton />
+      <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-10 text-center retro-title">
+        📺 Classic Rick & Morty Episodes
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {ids.map(id => (
+          <Episode ep={episodes[id]} key={id} />
         ))}
       </div>
 
-      {/* Display Favorites */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">Your Favorites</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-          {favorites.map(fav => (
-            <Favorite key={fav} fav={fav} />
-          ))}
-        </div>
-      </div>
+      <style jsx>{`
+        .retro-title {
+          text-shadow: 2px 2px #c1b07a;
+          letter-spacing: 0.05em;
+          font-family: 'Georgia', serif;
+        }
+      `}</style>
     </div>
   )
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(store => async () => {
-  await store.dispatch(fetchEpisodes())  // Dispatch the thunk to fetch episodes
-  return { props: {} }
-})
+export const getStaticProps = wrapper.getStaticProps((store) => async () => {
+    await store.dispatch(fetchEpisodes());
+  
+    return {
+      props: {},
+      revalidate: 1200, // Revalidate every 20 minutes
+    };
+  });

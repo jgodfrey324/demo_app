@@ -1,10 +1,25 @@
+// Add this at the top of the file to make it a Client Component
+"use client";
+
 import Character from '@/features/characters/Character'
-import { wrapper } from '../store'
+import { wrapper } from '../store/configureStore'
 import { fetchAllCharacters } from '@/features/characters/charactersAPI'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { useEffect } from 'react';
+import HomeButton from '@/components/HomeButton'
 
 export default function EpisodesPage() {
-  const { characters, status, error } = useSelector(state => state.characters)
+  const dispatch = useDispatch()
+  const { characters, ids, status, error } = useSelector(state => state.characters)
+
+  // Check if data is already in store (on the client side)
+  useEffect(() => {
+    if (ids.length === 0) {
+      // Only dispatch fetch if characters are not already in the store
+      console.log('Fetching characters client-side...')
+      dispatch(fetchAllCharacters())
+    }
+  }, [dispatch, ids.length])
 
   if (status === 'loading') {
     return <div>Loading characters...</div>
@@ -15,18 +30,23 @@ export default function EpisodesPage() {
   }
 
   return (
-    <div className="p-4">
-        <h1 className="text-3xl font-bold mb-4">Rick and Morty Characters</h1>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {characters.map(char => (
-                <Character key={char.id} char={char} />
-            ))}
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-black to-green-800 text-white p-6 font-mono">
+      <HomeButton />
+      <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-8 neon-text text-center">
+        🧬 Rick and Morty Characters
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {ids.map(id => (
+          <Character key={id} char={characters[id]} />
+        ))}
+      </div>
+
+      <style jsx>{`
+        .neon-text {
+          text-shadow: 0 0 5px #00ff99, 0 0 10px #00ff99, 0 0 20px #00ff99;
+        }
+      `}</style>
     </div>
   )
 }
-
-export const getServerSideProps = wrapper.getServerSideProps(store => async () => {
-  await store.dispatch(fetchAllCharacters())  // Dispatch the thunk to fetch episodes
-  return { props: {} }
-})

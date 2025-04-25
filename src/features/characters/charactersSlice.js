@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { HYDRATE } from 'next-redux-wrapper'
 import { fetchAllCharacters, fetchCharacterDetails } from './charactersAPI'
 
 const charactersSlice = createSlice({
@@ -12,6 +13,27 @@ const charactersSlice = createSlice({
   },
   reducers: {},
   extraReducers: (builder) => {
+    // HYDRATE must come first
+    builder.addCase(HYDRATE, (state, action) => {
+        // Merge server and client state
+        return {
+          ...state,
+          ...action.payload.characters,
+          characters: {
+            ...state.characters,
+            ...action.payload.characters.characters,
+          },
+          characterDetails: {
+            ...state.characterDetails,
+            ...action.payload.characters.characterDetails,
+          },
+          ids: Array.from(new Set([
+            ...state.ids,
+            ...(action.payload.characters.ids || []),
+          ])),
+        }
+      })
+
     // Fetching all characters
     builder
       .addCase(fetchAllCharacters.pending, (state) => {
@@ -24,7 +46,7 @@ const charactersSlice = createSlice({
         characters.forEach(character => {
           if (!state.characters[character.id]) {
             state.characters[character.id] = character
-            state.ids = [...state.ids, character.id]
+            state.ids.push(character.id)
           }
         })
       })

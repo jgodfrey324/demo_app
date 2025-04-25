@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { HYDRATE } from 'next-redux-wrapper'
 
 // Define an async thunk to fetch episodes
 export const fetchEpisodes = createAsyncThunk(
@@ -20,6 +21,22 @@ const episodesSlice = createSlice({
   },
   reducers: {},
   extraReducers: (builder) => {
+     // HYDRATE must come first
+     builder
+        .addCase(HYDRATE, (state, action) => {
+            return {
+                ...state,
+                ...action.payload.episodes,
+                episodes: {
+                    ...state.episodes,
+                    ...action.payload.episodes.episodes,
+                },
+                ids: Array.from(new Set([
+                    ...state.ids,
+                    ...(action.payload.episodes.ids || []),
+                ])),
+            }
+        })
     builder
       .addCase(fetchEpisodes.pending, (state) => {
         state.status = 'loading'
@@ -31,7 +48,7 @@ const episodesSlice = createSlice({
         episodes.forEach(episode => {
           if (!state.episodes[episode.id]) {
             state.episodes[episode.id] = episode
-            state.ids = [...state.ids, episode.id]
+            state.ids.push(episode.id)
           }
         })
       })
